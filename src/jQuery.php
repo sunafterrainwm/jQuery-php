@@ -37,6 +37,17 @@ class jQuery
 		$this->globalOptions = $options;
 	}
 
+	/**
+	 * jQuery.fn.init
+	 */
+	public static function init( string $selector, Dom\Node\AbstractNode|jQuery $node, ?Options $options = null ): self
+	{
+		$jq = $node instanceof jQuery ? $node : self::fromNode( $node );
+		$result = $jq->find( $selector );
+		$result->setOptions( $options );
+		return $result;
+	}
+
 	public static function fromString( string $html, ?Options $options = null ): self
 	{
 		if ( !self::$parser ) {
@@ -95,13 +106,28 @@ class jQuery
      */
     public function __toString(): string
     {
-        return $this->root->innerHtml();
+        return $this->html();
     }
+
+	public function __get( $name )
+	{
+		switch ($name) {
+			case 'html':
+				return $this->html();
+				break;
+			case 'text':
+				return $this->text();
+				break;
+			case 'node':
+				return $this->nodes;
+				break;
+		}
+	}
 
     /**
      * Sets a global options array to be used by all load calls.
      */
-    public function setOptions(Options $options): self
+    public function setOptions( Options $options ): self
     {
         $this->globalOptions = $options;
 
@@ -109,21 +135,29 @@ class jQuery
     }
 
 	/**
+	 * jQuery.fn.get
+	 * 
 	 * @param int $i
 	 * @return Dom\Node\AbstractNode[]|Dom\Node\AbstractNode
 	 */
-	public function get( int $i = null )
+	public function get( int $i = null ): array|Dom\Node\AbstractNode
 	{
 		$children = $this->root->getChildren();
 		return $i ? $children[ $i ] : $children;
 	}
 
-	public function clone()
+	/**
+	 * jQuery.fn.clone
+	 */
+	public function clone(): self
 	{
 		return self::fromString( $this->__toString() );
 	}
 
-	public function remove( string $selector = null )
+	/**
+	 * jQuery.fn.remove
+	 */
+	public function remove( string $selector = null ): self
 	{
 		if ( $selector ) {
 			$this->find( $selector )->remove();
@@ -135,7 +169,10 @@ class jQuery
 		return $this;
 	}
 
-	public function empty()
+	/**
+	 * jQuery.fn.empty
+	 */
+	public function empty(): self
 	{
 		foreach ( $this->children()->nodes as $ele ) {
 			$ele->delete();
@@ -144,7 +181,8 @@ class jQuery
 		return $this;
 	}
 
-	private function getRoot() {
+	private function getRoot(): Dom\Node\HtmlNode
+	{
 		$root = new Dom\Node\HtmlNode( "root" );
 		foreach ( $this->clone()->nodes as $ele ) {
 			$root->addChild( $ele );
@@ -152,7 +190,10 @@ class jQuery
 		return $root;
 	}
 
-	public function text( string $text = null )
+	/**
+	 * jQuery.fn.text
+	 */
+	public function text( string $text = null ): string|self
 	{
 		if ( $text ) {
 			$this->empty();
@@ -163,7 +204,10 @@ class jQuery
 		}
 	}
 
-	public function html( string $html = null )
+	/**
+	 * jQuery.fn.html
+	 */
+	public function html( string $html = null ): string|self
 	{
 		if ( $html ) {
 			$this->empty();
@@ -174,7 +218,11 @@ class jQuery
 		}
 	}
 
-	public function find( string $selector ) {
+	/**
+	 * jQuery.fn.find
+	 */
+	public function find( string $selector )
+	{
 		/**
 		 * @var Dom\Node\HTMLNode[] $nodes
 		 */
@@ -191,9 +239,9 @@ class jQuery
 	}
 
 	/**
-	 * @param (Dom\Node\AbstractNode|string) $eles
+	 * jQuery.fn.append
 	 */
-	public function append( ...$eles )
+	public function append( Dom\Node\AbstractNode|string ...$eles ): self
 	{
 		/**
 		 * @var \jQuery\jQuery[] $jq
@@ -219,7 +267,10 @@ class jQuery
 		return $this;
 	}
 
-	public function children()
+	/**
+	 * jQuery.fn.children
+	 */
+	public function children(): self
 	{
 		/**
 		 * @var Dom\Node\HTMLNode[] $nodes
@@ -234,5 +285,24 @@ class jQuery
 		}
 
 		return self::fromNodes( $children );
+	}
+
+	/**
+	 * jQuery.fn.filter
+	 * 
+	 * key: int
+	 * 
+	 * value: \PHPHtmlParser\Dom\Node\HTMLNode
+	 */
+	public function filter( callable $callback, int $filiterMode ): self
+	{
+		/**
+		 * @var Dom\Node\HTMLNode[] $nodes
+		 */
+		$j = $this->clone();
+
+		$j->nodes = array_filter( $j->nodes, $callback, $filiterMode );
+
+		return $j;
 	}
 }
