@@ -1,0 +1,22 @@
+{
+	"name": "sunny00217wm/jquery",
+	"version": "1.0.0-dev",
+    "description": "jquery-like library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "sunny00217wm",
+            "email": "sunny00217wm@gmail.com",
+            "homepage": "https://github.com/sunny00217wm"
+        }
+    ],
+    "require": {
+        "php": ">=7.2",
+        "paquettg/php-html-parser": ">3.0"
+    },
+    "autoload": {
+		"psr-4": { 
+        	"jQuery\\": "src/"
+       	}
+    }
+}
